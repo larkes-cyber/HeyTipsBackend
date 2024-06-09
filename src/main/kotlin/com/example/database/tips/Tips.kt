@@ -7,6 +7,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.Json.Default.encodeToString
 import ktor.models.AddTipRequest
+import ktor.models.EditTipRequest
 import ktor.models.TipResponse
 import ktor.models.TipTags
 import org.litote.kmongo.coroutine.CoroutineDatabase
@@ -38,6 +39,12 @@ object Tips {
         queries.deleteOne(filter)
     }
 
+    suspend fun editTip(tipDTO: TipDTO){
+        val filter = Filters.eq("id", tipDTO.id)
+        queries.deleteOne(filter)
+        queries.insertOne(tipDTO)
+    }
+
 
 }
 
@@ -52,13 +59,24 @@ fun TipDTO.toTipResponse():TipResponse{
     )
 }
 
-fun AddTipRequest.toTipDTO():TipDTO{
+fun AddTipRequest.toTipDTO(id:String):TipDTO{
     return TipDTO(
-        id = UUID.randomUUID().toString(),
+        id = id,
         color = color,
         description = description,
         imageSrc = imageSrc,
         tags = if(tags != null) Json.encodeToString(tags) else null,
         title = title
+    )
+}
+
+fun EditTipRequest.toTipDto():TipDTO{
+    return TipDTO(
+            id = serverId,
+            color = color,
+            description = description,
+            imageSrc = imageSrc,
+            tags = if(tags != null) Json.encodeToString(tags) else null,
+            title = title
     )
 }

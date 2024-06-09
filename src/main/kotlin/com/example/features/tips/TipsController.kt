@@ -2,6 +2,7 @@ package com.example.features.tips
 
 import com.example.database.tips.Tips
 import com.example.database.tips.toTipDTO
+import com.example.database.tips.toTipDto
 import com.example.database.tips.toTipResponse
 import com.example.utils.Constants
 import com.example.utils.Constants.SERVER_URL
@@ -11,7 +12,9 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import ktor.models.AddTipRequest
+import ktor.models.AddTipResponse
 import ktor.models.DeleteTipRequest
+import ktor.models.EditTipRequest
 import org.litote.kmongo.limit
 import java.io.File
 import java.util.*
@@ -22,9 +25,9 @@ class TipsController(private val call:ApplicationCall) {
         val receivedOffset = call.parameters["offset"]?.toInt() ?: 0
         val receivedLimit = call.parameters["limit"]?.toInt() ?: 0
         val tipsList = Tips.fetchTips()
-        val offset = if(receivedOffset >= tipsList.size) 0 else receivedOffset
-        val limit = if(receivedLimit + offset > tipsList.size) tipsList.size - offset else receivedLimit
-        val list = Tips.fetchTips().subList(offset, limit).map {
+        val offset = if(receivedOffset >= tipsList.size) 1 else receivedOffset
+        val limit = if(receivedLimit + offset > tipsList.size) tipsList.size - offset - 1 else receivedLimit
+        val list = Tips.fetchTips().subList(offset-1,offset + limit - 1).map {
             it.toTipResponse()
         }
         call.respond(list)
@@ -38,8 +41,9 @@ class TipsController(private val call:ApplicationCall) {
 
     suspend fun addTip(){
         val tip = call.receive<AddTipRequest>()
-        Tips.insertTip(tip.toTipDTO())
-        call.respond(HttpStatusCode.OK)
+        val id = UUID.randomUUID().toString()
+        Tips.insertTip(tip.toTipDTO(id))
+        call.respond(AddTipResponse(id))
     }
 
     suspend fun uploadTipImage(){
@@ -64,6 +68,18 @@ class TipsController(private val call:ApplicationCall) {
         call.respondFile(File("images/$id.jpeg"))
     }
 
+    suspend fun fetchOne(){
+        val id = call.parameters["id"] ?: return call.respond(HttpStatusCode.BadRequest)
+        val tip = Tips.fetchTips().find { it.id == id }
+        if(tip == null) call.respond(HttpStatusCode.BadRequest)
+        call.respond(tip?.toTipResponse()!!)
+    }
+
+    suspend fun editTip(){
+        val tip = call.receive<EditTipRequest>()
+        Tips.editTip(tip.toTipDto())
+        call.respond(HttpStatusCode.OK)
+    }
 
 
 }

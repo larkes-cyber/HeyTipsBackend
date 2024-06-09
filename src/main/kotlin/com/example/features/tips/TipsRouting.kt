@@ -20,12 +20,19 @@ fun Application.configureTipsRouting(){
             TipsController(call).fetchTips()
         }
 
+        get("/tips/fetchOne"){
+            TipsController(call).fetchOne()
+        }
+
         get("/tips/image/get"){
             TipsController(call).getImage()
         }
 
         post("/tips/image/upload") {
             TipsController(call).uploadTipImage()
+        }
+        post("/tips/edit"){
+            TipsController(call).editTip()
         }
 
 
