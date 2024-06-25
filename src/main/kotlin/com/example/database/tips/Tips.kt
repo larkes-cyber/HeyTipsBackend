@@ -45,6 +45,9 @@ object Tips {
         queries.insertOne(tipDTO)
     }
 
+    suspend fun deleteAll(){
+        queries.deleteMany()
+    }
 
 }
 

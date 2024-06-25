@@ -11,10 +11,7 @@ import io.ktor.http.content.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
-import ktor.models.AddTipRequest
-import ktor.models.AddTipResponse
-import ktor.models.DeleteTipRequest
-import ktor.models.EditTipRequest
+import ktor.models.*
 import org.litote.kmongo.limit
 import java.io.File
 import java.util.*
@@ -25,11 +22,14 @@ class TipsController(private val call:ApplicationCall) {
         val receivedOffset = call.parameters["offset"]?.toInt() ?: 0
         val receivedLimit = call.parameters["limit"]?.toInt() ?: 0
         val tipsList = Tips.fetchTips()
-        val offset = if(receivedOffset >= tipsList.size) 1 else receivedOffset
-        val limit = if(receivedLimit + offset > tipsList.size) tipsList.size - offset - 1 else receivedLimit
-        val list = Tips.fetchTips().subList(offset-1,offset + limit - 1).map {
+        println()
+        if(tipsList.isEmpty() || receivedOffset > tipsList.size) call.respond(emptyList<TipResponse>())
+        println("$receivedLimit $receivedOffset ${tipsList.size}  bvbvvbbb")
+        val limit = if(receivedLimit + receivedOffset >= tipsList.size) tipsList.size else receivedLimit
+        val list = Tips.fetchTips().subList(receivedOffset-1, limit).map {
             it.toTipResponse()
         }
+        println(list)
         call.respond(list)
     }
 
@@ -60,7 +60,7 @@ class TipsController(private val call:ApplicationCall) {
                 part.dispose()
             }
         }
-        call.respondText(text = "$SERVER_URL/tips/image/get?id=$id", status =  HttpStatusCode.OK)
+        call.respondText(text = id, status =  HttpStatusCode.OK)
     }
 
     suspend fun getImage(){
@@ -81,5 +81,12 @@ class TipsController(private val call:ApplicationCall) {
         call.respond(HttpStatusCode.OK)
     }
 
+    suspend fun deleteAll(){
+        Tips.deleteAll()
+    }
+
+    suspend fun getAllTips(){
+        println(Tips.fetchTips().toString() + " vvcvbbb")
+    }
 
 }

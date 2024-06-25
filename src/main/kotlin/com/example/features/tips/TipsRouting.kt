@@ -35,6 +35,14 @@ fun Application.configureTipsRouting(){
             TipsController(call).editTip()
         }
 
+        get("/tips/deleteAll") {
+            TipsController(call).deleteAll()
+        }
+
+        get("/tips/all"){
+            TipsController(call).getAllTips()
+        }
+
 
     }
 
