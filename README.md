@@ -6,7 +6,6 @@
 
 ## How to start
 - Install mongoDB
-- paste server url into SERVER_URL [link](https://github.com/larkes-cyber/HeyTipsBackend/blob/main/src/main/kotlin/com/example/utils/Constants.kt)
 - launch **main** in Application.kt
 
 ## Tech stack
